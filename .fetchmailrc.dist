@@ -1,0 +1,10 @@
+set daemon 60
+# set logfile /path/to/existing-log-file.log
+
+poll <mailserver> port 993 auth password with protocol IMAP
+     user '<username>'
+     password '<password>'
+     ssl
+     #keep
+     no rewrite
+     mda "/path/to/fetchMailParser.sh"
