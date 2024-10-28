@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  # couchdb:
+  #   image: couchdb:latest
+  #   container_name: couchdb
+  #   environment:
+  #     - COUCHDB_USER=admin
+  #     - COUCHDB_PASSWORD=admin_passwort
+  #   ports:
+  #     - "5984:5984"
+  #   volumes:
+  #     - couchdb_data:/opt/couchdb/data
+
+  # python_app:
+  #   image: python:3.10
+  #   container_name: python_app
+  #   volumes:
+  #     - ./scripts:/app
+  #   working_dir: /app
+  #   command: python your_script.py  # Hier dein Skript
+  #   depends_on:
+  #     - couchdb
+
+  nginx:
+    image: arm64v8/nginx:alpine
+    container_name: nginx
+    volumes:
+      - ./html/index.html:/usr/share/nginx/html/index.html   
+      # - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+    # depends_on:
+    #   - couchdb
+    #   - python_app
+
+volumes:
+  couchdb_data:
