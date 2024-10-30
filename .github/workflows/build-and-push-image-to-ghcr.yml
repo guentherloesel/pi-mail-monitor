@@ -1,0 +1,37 @@
+name: Build and push Image to ghcr.io
+run-name: Build and push Image  • ${{ github.repository }} ∷ ${{ github.ref }} ∷ ${{ inputs.image-tag }} to ghcr.io
+
+on:
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: additional image-tag
+        required: false
+        default: ''
+        type: string
+  release:
+    types:
+      - created
+  workflow_call:
+    inputs:
+      image-tag:
+        default: ''
+        description: additional image-tag
+        type: string
+
+env:
+  ADDITIONAL_IMAGE_TAG: ""
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
