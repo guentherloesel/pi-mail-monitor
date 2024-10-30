@@ -54,6 +54,8 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
             ghcr.io/${{ github.repository }}:${{ inputs.image-tag }}
+          build-args: |
+            TARGETPLATFORM=linux/arm64
 
       - name: Display Docker image info
         run: |
