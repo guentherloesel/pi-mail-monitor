@@ -1,5 +1,5 @@
 # Use the arm64v8/nginx base image for ARM-based devices
-FROM arm64v8/nginx:alpine
+FROM nginx:alpine
 
 # Set environment variables
 ENV NGINX_PORT=80
