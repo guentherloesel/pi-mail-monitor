@@ -3,6 +3,5 @@ OutputFile="/var/tmp/mail/"$FilenameUniqueId
 echo "" > $OutputFile
 while read x
 do
-#echo $x
 echo $x >> $OutputFile
 done
