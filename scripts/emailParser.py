@@ -57,7 +57,7 @@ def delete_file(file_path):
 
 def process_all_files():
     all_jobs = []
-    for file_path in glob.glob('./mail/mail*'):
+    for file_path in glob.glob('/var/tmp/mail/mail*'):
         job_data = extract_content(file_path)
         
         if isinstance(job_data, dict):
