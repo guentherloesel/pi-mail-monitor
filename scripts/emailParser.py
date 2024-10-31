@@ -1,5 +1,6 @@
 import re
 import quopri
+import glob
 
 def extract_content(file_path):
     try:
@@ -48,7 +49,17 @@ def decode_quoted_printable(encoded_text):
     decoded_text = quopri.decodestring(encoded_text).decode('utf-8')
     return decoded_text
     
+def process_all_files():
+    all_jobs = []
+    for file_path in glob.glob('./mail/mail*'):
+        job_data = extract_content(file_path)
+        all_jobs.append(job_data)
+    
+    return all_jobs
 
-file_path = './mail/mail20241028_110904_722922619'
-result = extract_content(file_path)
-print(result["text"])
+# Start
+all_jobs_result = process_all_files()
+for job in all_jobs_result:
+    print(job["job_description_link"])
+
+print("Anzahl der verarbeiteten Dateien: ", len(all_jobs_result))
