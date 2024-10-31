@@ -62,7 +62,7 @@ def process_all_files():
         
         if isinstance(job_data, dict):
             all_jobs.append(job_data)
-            delete_file(file_path)
+            # delete_file(file_path)
         else:
             print(f"Error processing file {file_path}: {job_data}")
     
