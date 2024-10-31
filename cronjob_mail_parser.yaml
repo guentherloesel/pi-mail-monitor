@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mail-parser
+spec:
+  schedule: "*/15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          imagePullSecrets:
+          - name: ghcr-secret
+          containers:
+          - name: mail-parser-container
+            image: ghcr.io/guentherloesel/pi-mail-monitor/parser:0.1.0
+            volumeMounts:
+            - mountPath: "/var/tmp/mail"
+              name: mail-volume
+          volumes:
+          - name: mail-volume
+            persistentVolumeClaim:
+              claimName: mail-pvc
+          restartPolicy: OnFailure
