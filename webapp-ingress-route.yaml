@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: webapp-http-redirect-ingressroute
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`bigberry`) && PathPrefix(`/pi-mail-monitor`)
+      kind: Rule
+      services:
+        - name: webapp-service
+          port: 80
+      middlewares:
+        - name: pi-mail-monitor-stripprefix

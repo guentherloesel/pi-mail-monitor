@@ -1,12 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp-nodeport
+  name: webapp-service
 spec:
   selector:
-    app: webapp # This label should match your NGINX pod's label
-  type: NodePort
+    app: webapp # nginx pod label
   ports:
-    - port: 80            # Target port on the NGINX pod
-      targetPort: 80
-      nodePort: 30000
+    - name: http
+      port: 80
