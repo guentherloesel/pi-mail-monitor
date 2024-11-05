@@ -49,7 +49,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/Dockerfile.parser
+          file: parser/Dockerfile.parser
           platforms: linux/arm64,linux/amd64
           push: true
           tags: |

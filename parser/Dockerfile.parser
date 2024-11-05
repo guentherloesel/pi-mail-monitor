@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-COPY ../scripts/emailParser.py /app/emailParser.py
+COPY ./emailParser.py /app/emailParser.py
 
 # Set the working directory
 WORKDIR /app
