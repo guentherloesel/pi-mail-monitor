@@ -12,7 +12,7 @@ spec:
           - name: ghcr-secret
           containers:
           - name: mail-parser-container
-            image: ghcr.io/guentherloesel/pi-mail-monitor/parser:0.1.0
+            image: ghcr.io/guentherloesel/pi-mail-monitor/parser:0.2.0
             volumeMounts:
             - mountPath: "/var/tmp/mail"
               name: mail-volume
