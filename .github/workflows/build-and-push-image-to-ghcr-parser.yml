@@ -48,8 +48,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./parser/
-          file: Dockerfile.parser
+          context: .
+          file: ./parser/Dockerfile.parser
           platforms: linux/arm64,linux/amd64
           push: true
           tags: |
