@@ -16,21 +16,21 @@ spec:
             volumeMounts:
             - mountPath: "/var/tmp/mail"
               name: mail-volume
-          env:
-          - name: DB_USER
-            valueFrom:
-              secretKeyRef:
-                name: job-db
-                key: user
-          - name: DB_PASS
-            valueFrom:
-              secretKeyRef:
-                name: job-db
-                key: pass
-          - name: DB_NAME
-            value: "jobs_db"
-          - name: DB_SERVICE
-            value: "couch-db-svc-couchdb"
+            env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: job-db
+                  key: user
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: job-db
+                  key: pass
+            - name: DB_NAME
+              value: "jobs_db"
+            - name: DB_SERVICE
+              value: "couch-db-svc-couchdb"
           volumes:
           - name: mail-volume
             persistentVolumeClaim:
