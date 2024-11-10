@@ -90,7 +90,7 @@ def process_all_files():
         job_data = extract_content(file_path)
         
         if isinstance(job_data, dict):
-            if save_to_couchdb(job_data):
+            if save_to_couchdb(env_vars, job_data):
                 delete_file(file_path)
             all_jobs.append(job_data)
         else:
@@ -98,7 +98,12 @@ def process_all_files():
     
     return all_jobs
 
-# Start
+try:
+    env_vars = load_env_vars()  # Load environment variables once
+except EnvironmentError as e:
+    print(e)
+    exit(1)
+    
 all_jobs_result = process_all_files()
 for job in all_jobs_result:
     print(job["job_description_link"])
