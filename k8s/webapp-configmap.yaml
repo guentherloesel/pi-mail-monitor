@@ -12,10 +12,25 @@ data:
         listen 80;
 
         location /couchdb/ {
+
+            if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+                add_header 'Access-Control-Allow-Headers' 'Origin, Authorization, Accept, Content-Type';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Length' 0;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                return 204;  # Leere Antwort
+            }
+
             # Use Basic Auth for CouchDB with credentials from the Secret
             proxy_pass http://couchdb;
             proxy_set_header Authorization "Basic ${DB_CREDENTIALS}";
             rewrite ^/couchdb/(.*) /$1 break;
             proxy_hide_header Authorization;
+
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'Origin, Authorization, Accept, Content-Type'; 
         }
     }

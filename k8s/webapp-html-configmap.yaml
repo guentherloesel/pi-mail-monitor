@@ -9,7 +9,7 @@ data:
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>CouchDB Daten anzeigen</title>
+      <title>CouchDB Detaildaten anzeigen</title>
     </head>
     <body>
       <button id="fetchButton">Daten abrufen</button>
@@ -17,8 +17,10 @@ data:
         <thead>
           <tr>
             <th>ID</th>
-            <th>Key</th>
             <th>Revision</th>
+            <th>Delivery Date</th>
+            <th>Text</th>
+            <th>Job Description Link</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -31,32 +33,57 @@ data:
               if (!response.ok) {
                 throw new Error('Network response was not ok');
               }
-              return response.json(); // JSON-Daten parsen
+              return response.json();
             })
             .then(data => {
-              console.log(data); // Log der Daten zur Konsole
               const tableBody = document.querySelector("#dataTable tbody");
               tableBody.innerHTML = ""; // Tabelle leeren
 
               data.rows.forEach(row => {
-                const tableRow = document.createElement("tr");
+                // Für jede ID und jeden Key die detaillierten Daten abrufen
+                fetch(`couchdb/jobs_db/${row.id}`)
+                  .then(detailResponse => {
+                    if (!detailResponse.ok) {
+                      throw new Error('Network response was not ok');
+                    }
+                    return detailResponse.json();
+                  })
+                  .then(detailData => {
+                    // Zeile für die Detaildaten erstellen
+                    const tableRow = document.createElement("tr");
 
-                // ID-Zelle
-                const idCell = document.createElement("td");
-                idCell.textContent = row.id;
-                tableRow.appendChild(idCell);
+                    // ID-Zelle
+                    const idCell = document.createElement("td");
+                    idCell.textContent = detailData._id;
+                    tableRow.appendChild(idCell);
 
-                // Key-Zelle
-                const keyCell = document.createElement("td");
-                keyCell.textContent = row.key;
-                tableRow.appendChild(keyCell);
+                    // Revision-Zelle
+                    const revCell = document.createElement("td");
+                    revCell.textContent = detailData._rev;
+                    tableRow.appendChild(revCell);
 
-                // Revision-Zelle
-                const revCell = document.createElement("td");
-                revCell.textContent = row.value.rev;
-                tableRow.appendChild(revCell);
+                    // Delivery Date-Zelle
+                    const deliveryDateCell = document.createElement("td");
+                    deliveryDateCell.textContent = detailData.delivery_date;
+                    tableRow.appendChild(deliveryDateCell);
 
-                tableBody.appendChild(tableRow); // Zeile zur Tabelle hinzufügen
+                    // Text-Zelle
+                    const textCell = document.createElement("td");
+                    textCell.textContent = detailData.text;
+                    tableRow.appendChild(textCell);
+
+                    // Job Description Link-Zelle
+                    const linkCell = document.createElement("td");
+                    const link = document.createElement("a");
+                    link.href = detailData.job_description_link;
+                    link.textContent = "Zur Jobbeschreibung";
+                    link.target = "_blank";
+                    linkCell.appendChild(link);
+                    tableRow.appendChild(linkCell);
+
+                    tableBody.appendChild(tableRow); // Zeile zur Tabelle hinzufügen
+                  })
+                  .catch(error => console.error('Es gab ein Problem mit dem Detail-Fetch:', error));
               });
             })
             .catch(error => console.error('Es gab ein Problem mit der Fetch-Operation:', error));
