@@ -10,9 +10,64 @@ spec:
   imagePullSecrets:
   - name: ghcr-secret
   containers:
-  - image: ghcr.io/guentherloesel/pi-mail-monitor/web:subpath-test
-    name: webapp
-    resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
+  - name: webapp
+    image: ghcr.io/guentherloesel/pi-mail-monitor/web:subpath-test
+    env:
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: job-db
+          key: user
+    - name: DB_PASS
+      valueFrom:
+        secretKeyRef:
+          name: job-db
+          key: pass
+    - name: DB_NAME
+      value: "jobs_db"
+    - name: DB_SERVICE
+      value: "couch-db-svc-couchdb"
+    - name: DB_PORT
+      value: "5984"
+    volumeMounts:
+    - mountPath: /etc/nginx/nginx.conf
+      name: nginx-couchdb-config
+      subPath: nginx.conf
+
+  initContainers:
+  - name: init-nginx-config
+    image: alpine
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      apk add --no-cache gettext && \
+      export DB_CREDENTIALS=$(echo -n "${DB_USER}:${DB_PASS}" | base64) && \
+      envsubst '$DB_SERVICE $DB_PORT $DB_CREDENTIALS' < /config/nginx.conf.template > /mnt/nginx/nginx.conf
+    env:
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: job-db
+          key: user
+    - name: DB_PASS
+      valueFrom:
+        secretKeyRef:
+          name: job-db
+          key: pass
+    - name: DB_SERVICE
+      value: "couch-db-svc-couchdb"
+    - name: DB_PORT
+      value: "5984"
+    volumeMounts:
+    - mountPath: /mnt/nginx
+      name: nginx-couchdb-config
+    - mountPath: /config/nginx.conf.template
+      name: nginx-config-template
+      subPath: nginx.conf.template
+
+  volumes:
+  - name: nginx-couchdb-config
+    emptyDir: {}
+  - name: nginx-config-template
+    configMap:
+      name: nginx-couchdb-config
