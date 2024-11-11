@@ -1,5 +1,5 @@
-name: Build and push Image to ghcr.io
-run-name: Build and push Image • ${{ github.repository }} ∷ ${{ github.ref }} ∷ ${{ inputs.image-tag }} to ghcr.io
+name: Build and push webapp Image to ghcr.io
+run-name: Build and push webapp Image • ${{ github.repository }} ∷ ${{ github.ref }} ∷ ${{ inputs.image-tag }} to ghcr.io
 
 on:
   workflow_dispatch:
@@ -49,7 +49,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile.web
+          file: webapp/Dockerfile.web
           platforms: linux/arm64,linux/amd64
           push: true
           tags: |
