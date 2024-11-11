@@ -11,7 +11,7 @@ spec:
   - name: ghcr-secret
   containers:
   - name: webapp
-    image: ghcr.io/guentherloesel/pi-mail-monitor/web:subpath-test
+    image: ghcr.io/guentherloesel/pi-mail-monitor/web:0.4.0
     env:
     - name: DB_USER
       valueFrom:
@@ -29,10 +29,12 @@ spec:
       value: "couch-db-svc-couchdb"
     - name: DB_PORT
       value: "5984"
+    - name: NGINX_PORT
+      value: "80"
     volumeMounts:
-    - mountPath: /etc/nginx/nginx.conf
+    - mountPath: /etc/nginx/conf.d/couchdb-proxy.conf
       name: nginx-couchdb-config
-      subPath: nginx.conf
+      subPath: couchdb-proxy.conf
 
   initContainers:
   - name: init-nginx-config
@@ -42,7 +44,7 @@ spec:
     - |
       apk add --no-cache gettext && \
       export DB_CREDENTIALS=$(echo -n "${DB_USER}:${DB_PASS}" | base64) && \
-      envsubst '$DB_SERVICE $DB_PORT $DB_CREDENTIALS' < /config/nginx.conf.template > /mnt/nginx/nginx.conf
+      envsubst '$DB_SERVICE $DB_PORT $DB_CREDENTIALS' < /config/couchdb-proxy.conf > /mnt/nginx/couchdb-proxy.conf
     env:
     - name: DB_USER
       valueFrom:
@@ -61,9 +63,9 @@ spec:
     volumeMounts:
     - mountPath: /mnt/nginx
       name: nginx-couchdb-config
-    - mountPath: /config/nginx.conf.template
+    - mountPath: /config/couchdb-proxy.conf
       name: nginx-config-template
-      subPath: nginx.conf.template
+      subPath: couchdb-proxy.conf
 
   volumes:
   - name: nginx-couchdb-config

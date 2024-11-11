@@ -3,22 +3,19 @@ kind: ConfigMap
 metadata:
   name: nginx-couchdb-config
 data:
-  nginx.conf.template: |
-    events {}
-    http {
-        upstream couchdb {
-            server "${DB_SERVICE}:${DB_PORT}";
-        }
+  couchdb-proxy.conf: |
+    upstream couchdb {
+        server "${DB_SERVICE}:${DB_PORT}";
+    }
 
-        server {
-            listen 80;
+    server {
+        listen 80;
 
-            location /couchdb/ {
-                # Use Basic Auth for CouchDB with credentials from the Secret
-                proxy_pass http://couchdb;
-                proxy_set_header Authorization "Basic ${DB_CREDENTIALS}";
-                rewrite ^/couchdb/(.*) /$1 break;
-                proxy_hide_header Authorization;
-            }
+        location /couchdb/ {
+            # Use Basic Auth for CouchDB with credentials from the Secret
+            proxy_pass http://couchdb;
+            proxy_set_header Authorization "Basic ${DB_CREDENTIALS}";
+            rewrite ^/couchdb/(.*) /$1 break;
+            proxy_hide_header Authorization;
         }
     }
