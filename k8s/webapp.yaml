@@ -35,6 +35,9 @@ spec:
     - mountPath: /etc/nginx/conf.d/couchdb-proxy.conf
       name: nginx-couchdb-config
       subPath: couchdb-proxy.conf
+    - mountPath: /etc/nginx/html/index.html
+      name: nginx-index-configmap
+      subPath: index.html
 
   initContainers:
   - name: init-nginx-config
@@ -73,3 +76,6 @@ spec:
   - name: nginx-config-template
     configMap:
       name: nginx-couchdb-config
+  - name: nginx-index-configmap
+    configMap:
+      name: nginx-index-html

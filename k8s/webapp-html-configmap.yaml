@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-index-html
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>CouchDB Daten anzeigen</title>
+    </head>
+    <body>
+      <button id="fetchButton">Daten abrufen</button>
+      <table id="dataTable" border="1">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Key</th>
+            <th>Revision</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <script>
+        document.getElementById("fetchButton").addEventListener("click", function() {
+          fetch('couchdb/jobs_db/_all_docs')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json(); // JSON-Daten parsen
+            })
+            .then(data => {
+              console.log(data); // Log der Daten zur Konsole
+              const tableBody = document.querySelector("#dataTable tbody");
+              tableBody.innerHTML = ""; // Tabelle leeren
+
+              data.rows.forEach(row => {
+                const tableRow = document.createElement("tr");
+
+                // ID-Zelle
+                const idCell = document.createElement("td");
+                idCell.textContent = row.id;
+                tableRow.appendChild(idCell);
+
+                // Key-Zelle
+                const keyCell = document.createElement("td");
+                keyCell.textContent = row.key;
+                tableRow.appendChild(keyCell);
+
+                // Revision-Zelle
+                const revCell = document.createElement("td");
+                revCell.textContent = row.value.rev;
+                tableRow.appendChild(revCell);
+
+                tableBody.appendChild(tableRow); // Zeile zur Tabelle hinzufügen
+              });
+            })
+            .catch(error => console.error('Es gab ein Problem mit der Fetch-Operation:', error));
+        });
+      </script>
+    </body>
+    </html>
