@@ -48,8 +48,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./webapp
-          file: Dockerfile.web
+          context: .
+          file: webapp/Dockerfile.web
           platforms: linux/arm64,linux/amd64
           push: true
           tags: |
