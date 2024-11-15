@@ -53,8 +53,8 @@ jobs:
           platforms: linux/arm64,linux/amd64
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/parser:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}/parser:${{ inputs.image-tag }}
+            ghcr.io/${{ github.repository }}/nats-test:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/nats-test:${{ inputs.image-tag }}
           build-args: |
             TARGETPLATFORM=linux/arm64
           labels: |
@@ -63,4 +63,4 @@ jobs:
 
       - name: Display Docker image info
         run: |
-          docker manifest inspect ghcr.io/${{ github.repository }}/parser:${{ github.ref_name }}
+          docker manifest inspect ghcr.io/${{ github.repository }}/nats-test:${{ github.ref_name }}
