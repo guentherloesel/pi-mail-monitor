@@ -48,7 +48,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./nats-test
           file: ./nats-test/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
