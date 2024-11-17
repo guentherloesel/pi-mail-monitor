@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats-test
+  labels:
+    app: nats-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nats-test
+  template:
+    metadata:
+      labels:
+        app: nats-test
+    spec:
+      imagePullSecrets:
+      - name: ghcr-secret
+      containers:
+      - name: nats-test
+        image: ghcr.io/guentherloesel/pi-mail-monitor/nats-test:0.2.0
+        env:
+        - name: NATS_SERVER
+          value: "nats://nats.pi-mail-monitor.svc.cluster.local:4222"
+        - name: NATS_SUBJECT
+          value: "test"
