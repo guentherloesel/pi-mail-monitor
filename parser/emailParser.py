@@ -3,6 +3,8 @@ import quopri
 import glob
 import os
 import couchdb
+import asyncio
+from nats.aio.client import Client as NATS
 
 def load_env_vars():
     env_vars = {
@@ -10,10 +12,12 @@ def load_env_vars():
         "DB_PASS": os.environ.get("DB_PASS"),
         "DB_NAME": os.environ.get("DB_NAME"),
         "DB_SERVICE": os.environ.get("DB_SERVICE"),
-        "DB_PORT": os.environ.get("DB_PORT") or "5984"
+        "DB_PORT": os.environ.get("DB_PORT") or "5984",
+        "NATS_SERVER": os.environ.get("NATS_SERVER") or "nats://localhost:4222",
+        "NATS_SUBJECT": os.environ.get("NATS_SUBJECT") or "jobs"
     }
     
-    missing_vars = [key for key, value in env_vars.items() if key != "DB_PORT" and not value]
+    missing_vars = [key for key, value in env_vars.items() if key not in ["DB_PORT", "NATS_SERVER", "NATS_SUBJECT"] and not value]
     if missing_vars:
         raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
@@ -84,28 +88,45 @@ def save_to_couchdb(env_vars, job_data):
         print(f"Error saving to CouchDB: {e}")
         return False
 
-def process_all_files():
+async def publish_to_nats(nats_server, nats_subject, job_data):
+    try:
+        nc = NATS()
+        await nc.connect(servers=[nats_server])
+
+        # Convert job data to string (or JSON) for publishing
+        message = str(job_data)
+        await nc.publish(nats_subject, message.encode('utf-8'))
+        print(f"Published job to NATS subject '{nats_subject}': {message}")
+        await nc.close()
+
+    except Exception as e:
+        print(f"Error publishing to NATS: {e}")
+
+async def process_file(file_path, env_vars):
+    job_data = extract_content(file_path)
+    if isinstance(job_data, dict):
+        if save_to_couchdb(env_vars, job_data):
+            await publish_to_nats(env_vars["NATS_SERVER"],env_vars["NATS_SUBJECT"], job_data)
+            delete_file(file_path)
+        return job_data
+    else:
+        print(f"Error processing file {file_path}: {job_data}")
+        return None
+
+async def process_all_files():
+    env_vars = load_env_vars()
     all_jobs = []
     for file_path in glob.glob('/var/tmp/mail/mail*'):
-        job_data = extract_content(file_path)
-        
-        if isinstance(job_data, dict):
-            if save_to_couchdb(env_vars, job_data):
-                delete_file(file_path)
+        job_data = await process_file(file_path, env_vars)
+        if job_data:
             all_jobs.append(job_data)
-        else:
-            print(f"Error processing file {file_path}: {job_data}")
     
     return all_jobs
 
-try:
-    env_vars = load_env_vars()  # Load environment variables once
-except EnvironmentError as e:
-    print(e)
-    exit(1)
-    
-all_jobs_result = process_all_files()
-for job in all_jobs_result:
-    print(job["job_description_link"])
-
-print("Anzahl der verarbeiteten Dateien: ", len(all_jobs_result))
+# Main entry point
+if __name__ == "__main__":
+    try:
+        asyncio.run(process_all_files())
+    except EnvironmentError as e:
+        print(e)
+        exit(1)
