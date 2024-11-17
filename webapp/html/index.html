@@ -1,25 +1,119 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>CouchDB Detaildaten anzeigen</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f9;
+        table {
+            border-collapse: collapse;
         }
-        h1 {
-            color: #333;
+
+        table td,
+        table th {
+            text-align: left;
+            width: 150px;
+            height: 100px;
+            overflow: auto;
+            text-align: left;
+            vertical-align: top;
+            padding: 8px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
+
 <body>
-    <h1>Hello World!</h1>
+    <button id="fetchButton">Daten abrufen</button>
+    <div id="array-length"></div>
+    <table id="dataTable" border="1">
+        <thead>
+            <tr>
+                <!-- <th>ID</th>
+                <th>Revision</th> -->
+                <th>Delivery Date</th>
+                <th>Text</th>
+                <th>Job Description Link</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.getElementById("fetchButton").addEventListener("click", function () {
+            fetch('http://bigberry/pi-mail-monitor/couchdb/jobs_db/_all_docs')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tableBody = document.querySelector("#dataTable tbody");
+                    tableBody.innerHTML = ""; // Tabelle leeren
+
+                    document.querySelector("#array-length").innerHTML = data.rows.length;
+
+                    data.rows.forEach(row => {
+                        // Für jede ID und jeden Key die detaillierten Daten abrufen
+                        fetch(`http://bigberry/pi-mail-monitor/couchdb/jobs_db/${row.id}`)
+                            .then(detailResponse => {
+                                if (!detailResponse.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return detailResponse.json();
+                            })
+                            .then(detailData => {
+
+                                if (detailData.text === "") return;
+
+                                // Zeile für die Detaildaten erstellen
+                                const tableRow = document.createElement("tr");
+
+                                // ID-Zelle
+                                // const idCell = document.createElement("td");
+                                // idCell.textContent = detailData._id;
+                                // tableRow.appendChild(idCell);
+
+                                // // Revision-Zelle
+                                // const revCell = document.createElement("td");
+                                // revCell.textContent = detailData._rev;
+                                // tableRow.appendChild(revCell);
+
+                                // Delivery Date-Zelle
+                                const deliveryDateCell = document.createElement("td");
+                                deliveryDateCell.textContent = new Date(detailData.delivery_date).toLocaleDateString('de-DE', {
+                                    day: '2-digit',
+                                    month: 'long',
+                                    year: 'numeric'
+                                });
+                                tableRow.appendChild(deliveryDateCell);
+
+                                // Text-Zelle
+                                //console.log(detailData.text)
+                                const textCell = document.createElement("td");
+                                textCell.innerText = detailData.text;
+
+                                tableRow.appendChild(textCell);
+
+                                // Job Description Link-Zelle
+                                const linkCell = document.createElement("td");
+                                const link = document.createElement("a");
+                                link.href = detailData.job_description_link;
+                                link.textContent = "Zur Jobbeschreibung";
+                                link.target = "_blank";
+                                linkCell.appendChild(link);
+                                tableRow.appendChild(linkCell);
+
+                                tableBody.appendChild(tableRow);
+                            })
+                            .catch(error => console.error('Es gab ein Problem mit dem Detail-Fetch:', error));
+                    });
+                })
+                .catch(error => console.error('Es gab ein Problem mit der Fetch-Operation:', error));
+        });
+    </script>
 </body>
+
 </html>
