@@ -28,7 +28,7 @@ data:
 
       <script>
         document.getElementById("fetchButton").addEventListener("click", function() {
-          fetch('couchdb/jobs_db/_all_docs')
+          fetch('http://bigberry/pi-mail-monitor/couchdb/jobs_db/_all_docs')
             .then(response => {
               if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -41,7 +41,7 @@ data:
 
               data.rows.forEach(row => {
                 // Für jede ID und jeden Key die detaillierten Daten abrufen
-                fetch(`couchdb/jobs_db/${row.id}`)
+                fetch(`http://bigberry/pi-mail-monitor/couchdb/jobs_db/${row.id}`)
                   .then(detailResponse => {
                     if (!detailResponse.ok) {
                       throw new Error('Network response was not ok');
