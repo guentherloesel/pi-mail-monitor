@@ -1,9 +1,9 @@
 FROM python:3.11-slim
 
-COPY ./parser/emailParser.py /app/emailParser.py
+COPY emailParser.py /app/emailParser.py
 
 WORKDIR /app
 
-RUN pip install couchdb
+RUN pip install nats-py couchdb
 
 CMD ["python", "emailParser.py"]
