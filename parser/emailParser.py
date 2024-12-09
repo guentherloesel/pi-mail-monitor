@@ -2,22 +2,16 @@ import re
 import quopri
 import glob
 import os
-import couchdb
 import asyncio
 from nats.aio.client import Client as NATS
 
 def load_env_vars():
     env_vars = {
-        "DB_USER": os.environ.get("DB_USER"),
-        "DB_PASS": os.environ.get("DB_PASS"),
-        "DB_NAME": os.environ.get("DB_NAME"),
-        "DB_SERVICE": os.environ.get("DB_SERVICE"),
-        "DB_PORT": os.environ.get("DB_PORT") or "5984",
         "NATS_SERVER": os.environ.get("NATS_SERVER") or "nats://localhost:4222",
         "NATS_SUBJECT": os.environ.get("NATS_SUBJECT") or "jobs"
     }
     
-    missing_vars = [key for key, value in env_vars.items() if key not in ["DB_PORT", "NATS_SERVER", "NATS_SUBJECT"] and not value]
+    missing_vars = [key for key, value in env_vars.items() if key not in ["NATS_SERVER", "NATS_SUBJECT"] and not value]
     if missing_vars:
         raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
@@ -65,29 +59,6 @@ def delete_file(file_path):
     except Exception as e:
         print(f"Error deleting file {file_path}: {e}")
 
-def save_to_couchdb(env_vars, job_data):
-    try:
-        db_user = env_vars["DB_USER"]
-        db_pass = env_vars["DB_PASS"]
-        db_name = env_vars["DB_NAME"]
-        db_service = env_vars["DB_SERVICE"]
-        db_port = env_vars["DB_PORT"]
-
-        couch = couchdb.Server(f"http://{db_user}:{db_pass}@{db_service}:{db_port}/")
-        
-        if db_name not in couch:
-            db = couch.create(db_name)
-        else:
-            db = couch[db_name]
-        
-        db.save(job_data)
-        print("Job data saved to CouchDB.")
-        return True
-    
-    except Exception as e:
-        print(f"Error saving to CouchDB: {e}")
-        return False
-
 async def publish_to_nats(nats_server, nats_subject, job_data):
     try:
         nc = NATS()
@@ -105,9 +76,8 @@ async def publish_to_nats(nats_server, nats_subject, job_data):
 async def process_file(file_path, env_vars):
     job_data = extract_content(file_path)
     if isinstance(job_data, dict):
-        if save_to_couchdb(env_vars, job_data):
-            await publish_to_nats(env_vars["NATS_SERVER"],env_vars["NATS_SUBJECT"], job_data)
-            delete_file(file_path)
+        await publish_to_nats(env_vars["NATS_SERVER"],env_vars["NATS_SUBJECT"], job_data)
+        delete_file(file_path)
         return job_data
     else:
         print(f"Error processing file {file_path}: {job_data}")
