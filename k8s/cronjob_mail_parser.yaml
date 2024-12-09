@@ -13,25 +13,11 @@ spec:
           - name: ghcr-secret
           containers:
           - name: mail-parser-container
-            image: ghcr.io/guentherloesel/pi-mail-monitor/parser:0.5.0
+            image: ghcr.io/guentherloesel/pi-mail-monitor/parser:0.6.0
             volumeMounts:
             - mountPath: "/var/tmp/mail"
               name: mail-volume
             env:
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: job-db
-                  key: user
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: job-db
-                  key: pass
-            - name: DB_NAME
-              value: "jobs_db"
-            - name: DB_SERVICE
-              value: "couch-db-svc-couchdb"
             - name: NATS_SERVER
               value: "nats://nats.pi-mail-monitor.svc.cluster.local:4222"
             - name: NATS_SUBJECT
