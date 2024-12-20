@@ -86,7 +86,7 @@ async def process_file(file_path, env_vars):
 async def process_all_files():
     env_vars = load_env_vars()
     all_jobs = []
-    for file_path in glob.glob('/var/tmp/mail/mail*'):
+    for file_path in glob.glob(env_vars["FILE_PATH"]):
         job_data = await process_file(file_path, env_vars)
         if job_data:
             all_jobs.append(job_data)
