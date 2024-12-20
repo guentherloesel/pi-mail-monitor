@@ -22,25 +22,14 @@ def extract_content(file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             text = file.read()
 
-            plain_text = extract_text_plain_with_regex(text)
-            plain_text = extract_content_before_endstring(plain_text, "Diesen Job melden")
-            print(plain_text)
-  
-
-            
-            
-            # Überflüssige Leerzeichen entfernen
-            # print(readable_text.strip())
-
-            # delivery_date = extract_value(text, r"Delivery-date:\s(.+)")
-            # mail_content = extract_text_between(text, 'Content-Type: text/plain; charset="UTF-8"', "Diesen Job melden")
-            # decoded_mail_content = decode_quoted_printable(mail_content)
-            # job_description_link = extract_value(decoded_mail_content, r"Die vollständige Stellenbeschreibung findest du hier\s+(https://\S+)")
+            delivery_date = extract_value(text, r"Delivery-date:\s(.+)")
+            mail_content = extract_text_plain_with_regex(text, "Diesen Job melden")
+            job_description_link = extract_value(mail_content, r"Die vollständige Stellenbeschreibung findest du hier\s+(https://\S+)")
 
             job = {
-                # "delivery_date": delivery_date,
-                # "text": decoded_mail_content,
-                # "job_description_link": job_description_link
+                "delivery_date": delivery_date,
+                "text": mail_content,
+                "job_description_link": job_description_link
             }
 
         return job
@@ -54,13 +43,8 @@ def extract_value(text, pattern):
     match = re.search(pattern, text)
     return match.group(1) if match else ""
 
-def extract_text_between(text, start_string, end_string):
-    pattern = re.escape(start_string) + r"(.*?)" + re.escape(end_string)
-    match = re.search(pattern, text, re.DOTALL)
-    return match.group(1).strip() if match else ""
 
-
-def extract_text_plain_with_regex(raw_email):
+def extract_text_plain_with_regex(raw_email, endstring):
     try:
         # Normalize line endings
         raw_email = raw_email.replace("\r\n", "\n").replace("\r", "\n")
@@ -69,7 +53,8 @@ def extract_text_plain_with_regex(raw_email):
         text_plain_pattern = re.compile(
             r"Content-Transfer-Encoding:\s*quoted-printable\s*"
             r"Content-Type:\s*text/plain;\s*charset=['\"]?UTF-8['\"]?\s*"
-            r"\n\n(.*?)(?=\nContent-Type:|\Z)",  # Stop at next "Content-Type" or end of file
+            r"(.*?)"  # Text nach Content-Type
+            rf"(?=\s*{re.escape(endstring)}|\Z|\nContent-Type:)",  # Stoppe bei endstring oder nächstem Block
             re.DOTALL | re.IGNORECASE
         )
         
@@ -89,19 +74,6 @@ def extract_text_plain_with_regex(raw_email):
     except Exception as e:
         return f"An error occurred: {e}"
 
-
-def extract_content_before_endstring(text, endstring):
-    pattern = rf"^(.*?)\s*{re.escape(endstring)}"
-    match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
-
-    if match:
-        return match.group(1).strip()
-    else:
-        return "Endstring not found or no content before it."
-
-
-def decode_quoted_printable(encoded_text):
-    return quopri.decodestring(encoded_text).decode('utf-8')
 
 def delete_file(file_path):
     try:
