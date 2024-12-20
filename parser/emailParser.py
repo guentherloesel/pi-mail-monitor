@@ -4,17 +4,17 @@ import glob
 import os
 import asyncio
 from nats.aio.client import Client as NATS
+from dotenv import load_dotenv
+
+# Load from a .env file
+load_dotenv()
 
 def load_env_vars():
     env_vars = {
         "NATS_SERVER": os.environ.get("NATS_SERVER") or "nats://localhost:4222",
-        "NATS_SUBJECT": os.environ.get("NATS_SUBJECT") or "jobs"
+        "NATS_SUBJECT": os.environ.get("NATS_SUBJECT") or "jobs",
+        "FILE_PATH": os.environ.get("FILE_PATH") or "/var/tmp/mail/mail*"
     }
-    
-    missing_vars = [key for key, value in env_vars.items() if key not in ["NATS_SERVER", "NATS_SUBJECT"] and not value]
-    if missing_vars:
-        raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
-
     return env_vars
 
 def extract_content(file_path):
