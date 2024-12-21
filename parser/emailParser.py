@@ -5,6 +5,7 @@ import os
 import asyncio
 from nats.aio.client import Client as NATS
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -87,8 +88,8 @@ async def publish_to_nats(nats_server, nats_subject, job_data):
         nc = NATS()
         await nc.connect(servers=[nats_server])
 
-        # Convert job data to string (or JSON) for publishing
-        message = str(job_data)
+        # Convert job data to JSON for publishing
+        message = json.dumps(job_data)
         await nc.publish(nats_subject, message.encode('utf-8'))
         # print(f"Published job to NATS subject '{nats_subject}': {message}")
         await nc.close()
