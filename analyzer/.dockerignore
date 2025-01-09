@@ -1,0 +1,10 @@
+*
+.env
+.env-dist
+!Dockerfile
+!.dockerignore
+!src/analyzer.ts
+!package.json
+!package-lock.json
+!tsconfig.json
+!node_modules
